@@ -12,7 +12,7 @@ use once_cell::sync::OnceCell;
 use crate::constants::{MARKETS, BLOCK_MARKETS};
 use crate::error::THSError;
 use crate::guest;
-use crate::types::{OrderBookData, ThsOrderBook};
+use crate::types::{KLine, OrderBookData, ThsOrderBook};
 
 /// 静态变量，用于缓存库和函数指针
 static LIBRARY: OnceCell<Library> = OnceCell::new();
@@ -48,6 +48,22 @@ pub struct OrderBookPayload {
     // 最新版本的dll返回为 err_info
     pub result: Vec<ThsOrderBook>,
 }
+
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KLineResponse {
+    // 最新版本的dll返回为 err_info
+    // #[serde(rename(deserialize = "errInfo"))]
+    pub err_info: String,
+    pub payload: KlinePayload,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KlinePayload {
+    // 最新版本的dll返回为 err_info
+    pub result: Vec<KLine>,
+}
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Response {
@@ -326,7 +342,7 @@ impl THS {
         adjust: &str,
         interval: &str,
         count: i32,
-    ) -> Result<Response, THSError> {
+    ) -> Result<KLineResponse, THSError> {
         let ths_code = ths_code.to_uppercase();
         if ths_code.len() != 10 || !MARKETS.iter().any(|&m| ths_code.starts_with(m)) {
             return Err(THSError::InvalidCode(
@@ -359,32 +375,33 @@ impl THS {
             }
         }
 
-        let mut response = self.call::<Response>("klines", Some(params.to_string()), 1024 * 1024)?;
+        let mut response = self.call::<KLineResponse>("klines", Some(params.to_string()), 1024 * 1024)?;
 
         // 处理返回数据中的时间字段
-        if let Some(serde_json::Value::Array(arr)) = response.payload.result.as_mut() {
-            for item in arr {
-                if let Some(obj) = item.as_object_mut() {
-                    if let Some(time_value) = obj.get("时间") {
-                        if Interval::minute_intervals().contains(&interval) {
-                            if let Some(time_int) = time_value.as_i64() {
-                                let hours = time_int / 10000;
-                                let minutes = (time_int % 10000) / 100;
-                                let seconds = time_int % 100;
-                                let time_str = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-                                obj.insert("时间".to_string(), serde_json::Value::String(time_str));
-                            }
-                        } else {
-                            if let Some(time_str) = time_value.as_str() {
-                                if let Ok(dt) = Local.datetime_from_str(time_str, "%Y%m%d") {
-                                    obj.insert("时间".to_string(), serde_json::Value::String(dt.format("%Y-%m-%d").to_string()));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // todo
+        // if let Some(serde_json::Value::Array(arr)) = response.payload.result.as_mut() {
+        //     for item in arr {
+        //         if let Some(obj) = item.as_object_mut() {
+        //             if let Some(time_value) = obj.get("时间") {
+        //                 if Interval::minute_intervals().contains(&interval) {
+        //                     if let Some(time_int) = time_value.as_i64() {
+        //                         let hours = time_int / 10000;
+        //                         let minutes = (time_int % 10000) / 100;
+        //                         let seconds = time_int % 100;
+        //                         let time_str = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
+        //                         obj.insert("时间".to_string(), serde_json::Value::String(time_str));
+        //                     }
+        //                 } else {
+        //                     if let Some(time_str) = time_value.as_str() {
+        //                         if let Ok(dt) = Local.datetime_from_str(time_str, "%Y%m%d") {
+        //                             obj.insert("时间".to_string(), serde_json::Value::String(dt.format("%Y-%m-%d").to_string()));
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         Ok(response)
     }
