@@ -1,7 +1,6 @@
-use std::collections::HashMap;
 
 use rusths::ths::{THS, Adjust, Interval};
-use chrono::Local;
+use chrono::{Local, Timelike};
 
 fn main() {
     // 初始化日志
@@ -25,7 +24,7 @@ fn main() {
         Some(end_time),
         Adjust::NONE,
         Interval::DAY,
-        100,
+        10,
     ).expect("Failed to get klines");
     println!("K线数据: {:?}", klines);
 
