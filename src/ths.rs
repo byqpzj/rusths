@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use chrono::{DateTime, Local, TimeZone};
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use libloading::{Library};
@@ -12,7 +12,7 @@ use once_cell::sync::OnceCell;
 use crate::constants::{MARKETS, BLOCK_MARKETS};
 use crate::error::THSError;
 use crate::guest;
-use crate::types::{KLine, OrderBookData, ThsOrderBook};
+use crate::types::{KLine, ThsOrderBook};
 
 /// 静态变量，用于缓存库和函数指针
 static LIBRARY: OnceCell<Library> = OnceCell::new();
@@ -375,7 +375,17 @@ impl THS {
             }
         }
 
-        let mut response = self.call::<KLineResponse>("klines", Some(params.to_string()), 1024 * 1024)?;
+        let mut response:KLineResponse = self.call::<KLineResponse>("klines", Some(params.to_string()), 1024 * 1024)?;
+        // 处理返回数据中的时间字段
+        // 处理返回数据中的时间字段
+        for item in response.payload.result.iter_mut() {
+            let time_int = &item.time_int;
+            let hours = time_int / 10000;
+            let minutes = (time_int % 10000) / 100;
+            let seconds = time_int % 100;
+            let time_str = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
+            item.time =  time_str;
+        }
 
         // 处理返回数据中的时间字段
         // todo

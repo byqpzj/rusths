@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KLine {
     #[serde(skip)]
-    pub time: DateTime<Local>,
+    pub time: String,
     #[serde(rename(deserialize = "1"))]
     pub time_int: i32,
     #[serde(rename(deserialize = "7"))]
