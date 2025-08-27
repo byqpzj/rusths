@@ -19,12 +19,12 @@ fn main() {
     let start_time = end_time - chrono::Duration::days(7);
     
     let klines = ths.klines(
-        "USHA600000",  // 浦发银行
-        Some(start_time),
-        Some(end_time),
+        "USZA300033",  // 浦发银行
+        Some("2024-01-01 00:00:00"),
+        Some("2025-01-01 00:00:00"),
         Adjust::NONE,
         Interval::DAY,
-        10,
+        0,
     ).expect("Failed to get klines");
     println!("K线数据: {:?}", klines);
 

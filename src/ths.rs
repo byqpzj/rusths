@@ -1,15 +1,14 @@
-use std::collections::HashMap;
-use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
+use libloading::Library;
+use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use libloading::{Library};
-use std::path::PathBuf;
-use std::ffi::{CString, CStr};
+use std::collections::HashMap;
+use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
-use once_cell::sync::OnceCell;
+use std::path::PathBuf;
 
 
-use crate::constants::{MARKETS, BLOCK_MARKETS};
+use crate::constants::{BLOCK_MARKETS, MARKETS};
 use crate::error::THSError;
 use crate::guest;
 use crate::types::{KLine, ThsOrderBook};
@@ -222,7 +221,12 @@ impl THS {
                 0 => {
                     let output = CStr::from_ptr(output_ptr).to_str().map_err(|e| THSError::ApiError(format!("输出解码失败: {}", e)))?;
                     if output.len() != 0 {
-                        serde_json::from_str::<T>(output).map_err(|e| THSError::ApiError(format!("JSON解析失败: {}", e)))
+                        let err_index = output.find("err_info").unwrap(); // 判断err_info 是否为空
+                        if &output[err_index + 10..err_index + 12] == "\"\"" {
+                            serde_json::from_str::<T>(output).map_err(|e| THSError::ApiError(format!("JSON解析失败: {}", e)))
+                        } else {
+                            Err(THSError::ApiError(output.into()))
+                        }
                     } else {
                         serde_json::from_str::<T>("{\"errInfo\":\"\",\"payload\":{}}").map_err(|e| THSError::ApiError(format!("JSON解析失败: {}", e)))
                     }
@@ -337,8 +341,8 @@ impl THS {
     pub fn klines(
         &mut self,
         ths_code: &str,
-        start_time: Option<DateTime<Local>>,
-        end_time: Option<DateTime<Local>>,
+        start_time: Option<&str>,
+        end_time: Option<&str>,
         adjust: &str,
         interval: &str,
         count: i32,
@@ -368,10 +372,13 @@ impl THS {
             params["count"] = serde_json::json!(count);
         } else {
             if let Some(start) = start_time {
-                params["start_time"] = serde_json::json!(start.format("%Y-%m-%d %H:%M:%S").to_string());
+                // params["start_time"] = serde_json::json!(start.format("%Y-%m-%d %H:%M:%S").to_string());
+                params["start_time"] = serde_json::json!(start);
+                
             }
             if let Some(end) = end_time {
-                params["end_time"] = serde_json::json!(end.format("%Y-%m-%d %H:%M:%S").to_string());
+                // params["end_time"] = serde_json::json!(end.format("%Y-%m-%d %H:%M:%S").to_string());
+                params["end_time"] = serde_json::json!(end);
             }
         }
 
