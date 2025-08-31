@@ -446,7 +446,7 @@ impl THS {
             "codes": ths_code,
         });
 
-        let response = self.call::<TickResponse>("depth", Some(params.to_string()), 512 * ths_code.len())?;
+        let response = self.call::<TickResponse>("depth", Some(params.to_string()), 360 * ths_code.len())?;
         Ok(response)
     }
 
