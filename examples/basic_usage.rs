@@ -1,6 +1,6 @@
 
 use rusths::ths::{THS, Adjust, Interval};
-use chrono::{Local, Timelike};
+use chrono::{Local};
 
 fn main() {
     // 初始化日志
@@ -10,13 +10,16 @@ fn main() {
     // 连接到服务器
     ths.connect().expect("Failed to connect to server");
 
+    let start_time = Local::now().timestamp_millis();
     // 获取股票列表
     let stocks = ths.order_book_bid("USHA600000").expect("Failed to get stock list");
-    println!("订单簿: {:?}", stocks);
+    // println!("订单簿: {:?}", stocks);
+    let end_time = Local::now().timestamp_millis();
+    println!("{}", end_time - start_time);
 
     // 获取某只股票的K线数据
     let end_time = Local::now();
-    let start_time = end_time - chrono::Duration::days(7);
+    // let start_time = end_time - chrono::Duration::days(7);
     
     let klines = ths.klines(
         "USZA300033",  // 浦发银行

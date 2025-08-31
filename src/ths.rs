@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use crate::constants::{BLOCK_MARKETS, MARKETS};
 use crate::error::THSError;
 use crate::guest;
-use crate::types::{KLine, ThsOrderBook};
+use crate::types::{KLine, ThsOrderBook, Tick};
 
 /// 静态变量，用于缓存库和函数指针
 static LIBRARY: OnceCell<Library> = OnceCell::new();
@@ -63,6 +63,20 @@ pub struct KlinePayload {
     pub result: Vec<KLine>,
 }
 
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TickResponse {
+    // 最新版本的dll返回为 err_info
+    // #[serde(rename(deserialize = "errInfo"))]
+    pub err_info: String,
+    pub payload: TickPayload,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TickPayload {
+    // 最新版本的dll返回为 err_info
+    pub result: Vec<Tick>,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Response {
@@ -420,6 +434,19 @@ impl THS {
         //     }
         // }
 
+        Ok(response)
+    }
+
+    pub fn depth(
+        &mut self,
+        ths_code: Vec<&str>,
+    ) -> Result<TickResponse, THSError> {
+
+        let params = serde_json::json!({
+            "codes": ths_code,
+        });
+
+        let response = self.call::<TickResponse>("depth", Some(params.to_string()), 512 * ths_code.len())?;
         Ok(response)
     }
 
