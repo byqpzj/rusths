@@ -466,8 +466,38 @@ impl THS {
         });
 
         let mut response = self.call::<TickAllResponse>("tick.super_level1", Some(params.to_string()), 1024 * 1024 * 2)?;
-        // 处理返回数据中的时间字段
-
+        // 处理 9:30 前的数据，把 量=2147483648 的值处理为 0
+        for item in response.payload.result.iter_mut() {
+            // 只处理 9:30 前的数据 5400  =  (9.5小时 - 8 时区) * 3600
+            if item.time % (3600 * 24) >= 5400  {
+                println!("break");
+                break
+            }
+            if item.b5_v == 2147483648 {
+                item.b5_v = 0
+            }
+            if item.b4_v == 2147483648 {
+                item.b4_v = 0
+            }
+            if item.b3_v == 2147483648 {
+                item.b3_v = 0
+            }
+            if item.b2_v == 2147483648 {
+                item.b2_v = 0
+            }
+            if item.a5_v == 2147483648 {
+                item.a5_v = 0
+            }
+            if item.a4_v == 2147483648 {
+                item.a4_v = 0
+            }
+            if item.a3_v == 2147483648 {
+                item.a3_v = 0
+            }
+            if item.a2_v == 2147483648 {
+                item.a2_v = 0
+            }
+        }
         Ok(response)
     }
 

@@ -12,7 +12,7 @@ fn main() {
     // 获取实时行情
     let market_data = ths.tick_super_level1("USHA600000")
         .expect("Failed to get market data");
-    println!("五档: {:?}", market_data);
+    println!("五档: {:?}", market_data.payload.result.get(0));
 
     // 断开连接
     ths.disconnect().expect("Failed to disconnect");
