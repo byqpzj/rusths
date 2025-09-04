@@ -17,6 +17,13 @@ use crate::types::{KLine, ThsOrderBook, Tick, TickAll};
 static LIBRARY: OnceCell<Library> = OnceCell::new();
 static CALL_FN: OnceCell<unsafe extern "C" fn(*const c_char, *mut c_char, c_int, *const c_void) -> c_int> = OnceCell::new();
 
+#[derive(Debug, Clone)]
+pub struct THS {
+    ops: ThsOption,
+    lib: &'static Library,
+    login: bool,
+    share_instance_id: i32,
+}
 
 /// 初始化参数
 #[derive(Debug, Clone, Serialize, Deserialize,Default)]
@@ -27,76 +34,54 @@ pub struct ThsOption{
     pub lib_ver: &'static str,
 }
 
-#[derive(Debug, Clone)]
-pub struct THS {
-    ops: ThsOption,
-    lib: &'static Library,
-    login: bool,
-    share_instance_id: i32,
-}
-
+/// 订单簿
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrderBookResponse {
-    // 最新版本的dll返回为 err_info
-    // #[serde(rename(deserialize = "errInfo"))]
     pub err_info: String,
     pub payload: OrderBookPayload,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OrderBookPayload {
-    // 最新版本的dll返回为 err_info
     pub result: Vec<ThsOrderBook>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KLineResponse {
-    // 最新版本的dll返回为 err_info
-    // #[serde(rename(deserialize = "errInfo"))]
     pub err_info: String,
     pub payload: KlinePayload,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KlinePayload {
-    // 最新版本的dll返回为 err_info
     pub result: Vec<KLine>,
 }
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickResponse {
-    // 最新版本的dll返回为 err_info
-    // #[serde(rename(deserialize = "errInfo"))]
     pub err_info: String,
     pub payload: TickPayload,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickPayload {
-    // 最新版本的dll返回为 err_info
     pub result: Vec<Tick>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickAllResponse {
-    // 最新版本的dll返回为 err_info
-    // #[serde(rename(deserialize = "errInfo"))]
     pub err_info: String,
     pub payload: TickAllPayload,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickAllPayload {
-    // 最新版本的dll返回为 err_info
     pub result: Vec<TickAll>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Response {
-    // 最新版本的dll返回为 err_info
-    // #[serde(rename(deserialize = "errInfo"))]
     pub err_info: String,
     pub payload: Payload,
 }
@@ -626,6 +611,47 @@ impl THS {
         self.get_block_data(0xD90C)
     }
 
+    pub fn wencai_base(&mut self, condition: &str) -> Result<Response, THSError> {
+        self.call::<Response>(
+            "wencai_base",
+            Some(condition.to_string()),
+            1024 * 1024,
+        )
+    }
+
+    pub fn wencai_nlp(&mut self, condition: &str) -> Result<Response, THSError> {
+        self.call::<Response>(
+            "wencai_nlp",
+            Some(condition.to_string()),
+            1024 * 1024,
+        )
+    }
+
+    pub fn order_book_ask(&mut self, ths_code: &str) -> Result<OrderBookResponse, THSError> {
+        self.call::<OrderBookResponse>(
+            "order_book_ask",
+            Some("\"".to_owned() + ths_code +"\""),
+            1024 * 1024,
+        )
+    }
+
+    pub fn order_book_bid(&mut self, ths_code: &str) -> Result<OrderBookResponse, THSError> {
+        self.call::<OrderBookResponse>(
+            "order_book_bid",
+            Some("\"".to_owned() + ths_code +"\""),
+            1024 * 1024,
+        )
+    }
+
+    pub fn ipo_today(&mut self) -> Result<Response, THSError> {
+        self.call::<Response>("ipo_today", None, 1024)
+    }
+
+    pub fn ipo_wait(&mut self) -> Result<Response, THSError> {
+        self.call::<Response>("ipo_wait", None, 1024)
+    }
+
+    /// 老版本的 api
     pub fn get_transaction_data(&mut self, ths_code: &str, start: i64, end: i64) -> Result<Response, THSError> {
         let ths_code = ths_code.to_uppercase();
         if ths_code.len() != 10 || !MARKETS.iter().any(|&m| ths_code.starts_with(m)) {
@@ -667,9 +693,9 @@ impl THS {
         }
 
         let data_type = concat!(
-            "1,5,7,10,12,13,14,18,19,20,21,25,26,27,28,29,31,32,33,34,35,49,",
-            "69,70,92,123,125,150,151,152,153,154,155,156,157,45,66,661,102,103,",
-            "104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,123,125"
+        "1,5,7,10,12,13,14,18,19,20,21,25,26,27,28,29,31,32,33,34,35,49,",
+        "69,70,92,123,125,150,151,152,153,154,155,156,157,45,66,661,102,103,",
+        "104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,123,125"
         );
 
         let market = &ths_code[..4];
@@ -716,47 +742,6 @@ impl THS {
         );
 
         self.cmd_query_data(req, "zhu", 1024 * 1024 * 2, 5)
-    }
-
-
-    pub fn wencai_base(&mut self, condition: &str) -> Result<Response, THSError> {
-        self.call::<Response>(
-            "wencai_base",
-            Some(condition.to_string()),
-            1024 * 1024,
-        )
-    }
-
-    pub fn wencai_nlp(&mut self, condition: &str) -> Result<Response, THSError> {
-        self.call::<Response>(
-            "wencai_nlp",
-            Some(condition.to_string()),
-            1024 * 1024 * 8,
-        )
-    }
-
-    pub fn order_book_ask(&mut self, ths_code: &str) -> Result<OrderBookResponse, THSError> {
-        self.call::<OrderBookResponse>(
-            "order_book_ask",
-            Some("\"".to_owned() + ths_code +"\""),
-            1024 * 1024 * 8,
-        )
-    }
-
-    pub fn order_book_bid(&mut self, ths_code: &str) -> Result<OrderBookResponse, THSError> {
-        self.call::<OrderBookResponse>(
-            "order_book_bid",
-            Some("\"".to_owned() + ths_code +"\""),
-            1024 * 1024 * 8,
-        )
-    }
-
-    pub fn ipo_today(&mut self) -> Result<Response, THSError> {
-        self.call::<Response>("ipo_today", None, 1024)
-    }
-
-    pub fn ipo_wait(&mut self) -> Result<Response, THSError> {
-        self.call::<Response>("ipo_wait", None, 1024)
     }
 
     pub fn history_minute_time_data(&mut self, ths_code: &str, date: &str, fields: Option<Vec<&str>>) -> Result<Response, THSError> {

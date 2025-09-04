@@ -1,7 +1,7 @@
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 
-
+/// 多支实时 Tick 格式
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Tick {
     #[serde(rename(deserialize = "150"))]
@@ -52,6 +52,7 @@ pub struct Tick {
     pub prev_close: f64, // 昨收价
 }
 
+/// 单支五档行情数据格式
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickAll {
     #[serde(rename(deserialize = "1"))]
@@ -61,7 +62,7 @@ pub struct TickAll {
     #[serde(rename(deserialize = "12"))]
     pub bs: u32, // 成交方向
     #[serde(rename(deserialize = "13"))]
-    pub volume: i32, // 成交量
+    pub volume: i32, // 总成交量
     #[serde(rename(deserialize = "14"))]
     pub outer_volume: i32, // 外盘成交量
 
@@ -85,7 +86,7 @@ pub struct TickAll {
     #[serde(rename(deserialize = "18"))]
     pub trade_num: u32, // 交易笔数
     #[serde(rename(deserialize = "19"))]
-    pub turnover: i64, // 总金额
+    pub turnover: i64, // 总成交额
 
     #[serde(rename(deserialize = "20"))]
     pub b1_p: f64, // 买1价
@@ -137,6 +138,7 @@ pub struct KLine {
     pub amount: f64, // 成交额
 }
 
+/// 订单簿
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ThsOrderBook{
     pub orderlevel: i32,
