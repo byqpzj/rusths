@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use crate::constants::{BLOCK_MARKETS, MARKETS};
 use crate::error::THSError;
 use crate::guest;
-use crate::types::{KLine, ThsOrderBook, Tick};
+use crate::types::{KLine, ThsOrderBook, Tick, TickAll};
 
 /// 静态变量，用于缓存库和函数指针
 static LIBRARY: OnceCell<Library> = OnceCell::new();
@@ -21,9 +21,10 @@ static CALL_FN: OnceCell<unsafe extern "C" fn(*const c_char, *mut c_char, c_int,
 /// 初始化参数
 #[derive(Debug, Clone, Serialize, Deserialize,Default)]
 pub struct ThsOption{
-    pub username: String,
-    pub password: String,
-    pub lib_ver: String,
+    pub username: &'static str,
+    pub password: &'static str,
+    #[serde(skip_serializing)]
+    pub lib_ver: &'static str,
 }
 
 #[derive(Debug, Clone)]
@@ -76,6 +77,20 @@ pub struct TickResponse {
 pub struct TickPayload {
     // 最新版本的dll返回为 err_info
     pub result: Vec<Tick>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TickAllResponse {
+    // 最新版本的dll返回为 err_info
+    // #[serde(rename(deserialize = "errInfo"))]
+    pub err_info: String,
+    pub payload: TickAllPayload,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TickAllPayload {
+    // 最新版本的dll返回为 err_info
+    pub result: Vec<TickAll>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -210,7 +225,7 @@ impl THS {
         let input = format!(
             r#"{{"method":"{}","params":{}}}"#,
             method,
-            params.as_deref().unwrap_or("")
+            params.as_deref().unwrap_or("\"\"")
         );
 
         let input_str = CString::new(input).map_err(|e| THSError::ApiError(format!("无效的输入参数: {}", e)))?;
@@ -449,6 +464,28 @@ impl THS {
         let response = self.call::<TickResponse>("depth", Some(params.to_string()), 360 * ths_code.len())?;
         Ok(response)
     }
+
+    pub fn tick_super_level1(
+        &mut self,
+        ths_code: &str,
+    ) -> Result<TickAllResponse, THSError> {
+        let ths_code = ths_code.to_uppercase();
+        if ths_code.len() != 10 || !MARKETS.iter().any(|&m| ths_code.starts_with(m)) {
+            return Err(THSError::InvalidCode(
+                "证券代码必须为10个字符，且以 'USHA' 或 'USZA' 开头".into(),
+            ));
+        }
+
+        let params = serde_json::json!({
+            "code": ths_code,
+        });
+
+        let mut response = self.call::<TickAllResponse>("tick.super_level1", Some(params.to_string()), 1024 * 1024 * 2)?;
+        // 处理返回数据中的时间字段
+
+        Ok(response)
+    }
+
 
     pub fn stock_market_data(&mut self, ths_code: &str) -> Result<Response, THSError> {
         let codes = if ths_code.contains(',') {

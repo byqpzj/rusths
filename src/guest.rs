@@ -4,11 +4,11 @@ pub const ALL_GUEST:&str = "thsguest_pysh6u0g@8cd5f58b0620334756da7d4df66ba7dd==
 
 
 /// 左移加密字符串
-pub fn rand_account() -> (String, String) {
+pub fn rand_account() -> (&'static str, &'static str) {
     let split: Vec<&str> = ALL_GUEST.split("====").collect();
     let mut rng = rand::rng();
     let option = split.choose(&mut rng);
     let parts: Vec<&str> = option.unwrap().split("@").collect();
     // 确保有两个部分，并转换为 String 类型的元组
-    (parts[0].to_string(), parts[1].to_string())
+    (parts[0], parts[1])
 }

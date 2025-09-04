@@ -53,6 +53,71 @@ pub struct Tick {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TickAll {
+    #[serde(rename(deserialize = "1"))]
+    pub time:i32,
+    #[serde(rename(deserialize = "10"))]
+    pub price: f64, // 价格
+    #[serde(rename(deserialize = "12"))]
+    pub bs: u32, // 成交方向
+    #[serde(rename(deserialize = "13"))]
+    pub volume: i32, // 成交量
+    #[serde(rename(deserialize = "14"))]
+    pub outer_volume: i32, // 外盘成交量
+
+    #[serde(rename(deserialize = "150"))]
+    pub b4_p: f64, // 买4价
+    #[serde(rename(deserialize = "151"))]
+    pub b4_v: i64, // 买1量
+    #[serde(rename(deserialize = "152"))]
+    pub a4_p: f64, // 卖4价
+    #[serde(rename(deserialize = "153"))]
+    pub a4_v: i64, // 卖4量
+    #[serde(rename(deserialize = "154"))]
+    pub b5_p: f64, // 买5价
+    #[serde(rename(deserialize = "155"))]
+    pub b5_v: i64, // 买5量
+    #[serde(rename(deserialize = "156"))]
+    pub a5_p: f64, // 卖5价
+    #[serde(rename(deserialize = "157"))]
+    pub a5_v: i64, // 卖5量
+
+    #[serde(rename(deserialize = "18"))]
+    pub trade_num: u32, // 交易笔数
+    #[serde(rename(deserialize = "19"))]
+    pub turnover: i64, // 总金额
+
+    #[serde(rename(deserialize = "20"))]
+    pub b1_p: f64, // 买1价
+    #[serde(rename(deserialize = "21"))]
+    pub a1_p: f64, // 卖1价
+    #[serde(rename(deserialize = "25"))]
+    pub b1_v: i64, // 买1量
+    #[serde(rename(deserialize = "26"))]
+    pub b2_p: f64, // 买2价
+    #[serde(rename(deserialize = "27"))]
+    pub b2_v: i64, // 买2量
+    #[serde(rename(deserialize = "28"))]
+    pub b3_p: f64, // 买3价
+    #[serde(rename(deserialize = "29"))]
+    pub b3_v: i64, // 买3量
+
+    #[serde(rename(deserialize = "31"))]
+    pub a1_v: i64, // 卖1量
+    #[serde(rename(deserialize = "32"))]
+    pub a2_p: f64, // 卖2价
+    #[serde(rename(deserialize = "33"))]
+    pub a2_v: i64, // 卖2量
+    #[serde(rename(deserialize = "34"))]
+    pub a3_p: f64, // 卖3价
+    #[serde(rename(deserialize = "35"))]
+    pub a3_v: i64, // 卖3量
+
+    #[serde(rename(deserialize = "49"))]
+    pub live_vol: i64, // 当前量
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KLine {
     #[serde(skip)]
     pub time: String,

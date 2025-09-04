@@ -5,9 +5,9 @@ fn main() {
 
     // 创建 THS 实例
     let mut ths = THS::new(Some(ThsOption { 
-        username: String::new(),
-        password: String::new(),
-        lib_ver: "116".parse().unwrap() 
+        username: "",
+        password: "",
+        lib_ver: "116"
     })).expect("Failed to create THS instance");
 
     // 连接到服务器

@@ -19,4 +19,4 @@ path = "examples/basic_usage.rs"
 
 [[example]]
 name = "tick_3s"
-path = "examples/tick_3s.rs"
+path = "examples/tick_3s_old.rs"
