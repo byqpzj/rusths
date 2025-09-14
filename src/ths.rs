@@ -397,15 +397,21 @@ impl THS {
         }
 
         let mut response:KLineResponse = self.call::<KLineResponse>("klines", Some(params.to_string()), 1024 * 1024)?;
+        // todo 处理返回数据中的时间字段， 日线和分钟线分开处理
         // 处理返回数据中的时间字段
-        // 处理返回数据中的时间字段
-        for item in response.payload.result.iter_mut() {
+        if interval == Interval::DAY || interval == Interval::WEEK || interval == Interval::MONTH || interval == Interval::QUARTER || interval == Interval::YEAR {
+            for item in response.payload.result.iter_mut() {
             let time_int = &item.time_int;
-            let hours = time_int / 10000;
-            let minutes = (time_int % 10000) / 100;
-            let seconds = time_int % 100;
-            let time_str = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-            item.time =  time_str;
+            let year = time_int / 10000;
+            let mounth = (time_int % 10000) / 100;
+            let day = time_int % 100;
+            let time_str = format!("{:02}{:02}{:02}", year, mounth, day);
+                // 日期格式为 YYYYMMDD，转为时间戳
+            if let Ok(date) = chrono::NaiveDate::parse_from_str(&time_str, "%Y%m%d") {
+                    let timestamp = date.and_hms_opt(0, 0, 0).unwrap().timestamp();
+                    item.time = timestamp;
+                }
+            }
         }
 
         // 处理返回数据中的时间字段

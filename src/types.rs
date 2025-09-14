@@ -120,8 +120,8 @@ pub struct TickAll {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KLine {
-    #[serde(skip)]
-    pub time: String,
+    #[serde(skip_deserializing)]
+    pub time: i64,
     #[serde(rename(deserialize = "1"))]
     pub time_int: i32,
     #[serde(rename(deserialize = "7"))]
