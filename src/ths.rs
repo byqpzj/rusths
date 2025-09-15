@@ -401,44 +401,28 @@ impl THS {
         // 处理返回数据中的时间字段
         if interval == Interval::DAY || interval == Interval::WEEK || interval == Interval::MONTH || interval == Interval::QUARTER || interval == Interval::YEAR {
             for item in response.payload.result.iter_mut() {
-            let time_int = &item.time_int;
-            let year = time_int / 10000;
-            let mounth = (time_int % 10000) / 100;
-            let day = time_int % 100;
-            let time_str = format!("{:02}{:02}{:02}", year, mounth, day);
+                let time_int = &item.time_int;
+                let year = time_int / 10000;
+                let month = (time_int % 10000) / 100;
+                let day = time_int % 100;
                 // 日期格式为 YYYYMMDD，转为时间戳
-            if let Ok(date) = chrono::NaiveDate::parse_from_str(&time_str, "%Y%m%d") {
-                    let timestamp = date.and_hms_opt(0, 0, 0).unwrap().timestamp();
-                    item.time = timestamp;
-                }
+                let timestamp = chrono::NaiveDate::from_ymd_opt(year, month as u32, day as u32).unwrap().and_hms_opt(0, 0, 0).unwrap().and_utc().timestamp();
+                item.time = timestamp;
             }
-        }
-
-        // 处理返回数据中的时间字段
-        // todo
-        // if let Some(serde_json::Value::Array(arr)) = response.payload.result.as_mut() {
-        //     for item in arr {
-        //         if let Some(obj) = item.as_object_mut() {
-        //             if let Some(time_value) = obj.get("时间") {
-        //                 if Interval::minute_intervals().contains(&interval) {
-        //                     if let Some(time_int) = time_value.as_i64() {
-        //                         let hours = time_int / 10000;
-        //                         let minutes = (time_int % 10000) / 100;
-        //                         let seconds = time_int % 100;
-        //                         let time_str = format!("{:02}:{:02}:{:02}", hours, minutes, seconds);
-        //                         obj.insert("时间".to_string(), serde_json::Value::String(time_str));
-        //                     }
-        //                 } else {
-        //                     if let Some(time_str) = time_value.as_str() {
-        //                         if let Ok(dt) = Local.datetime_from_str(time_str, "%Y%m%d") {
-        //                             obj.insert("时间".to_string(), serde_json::Value::String(dt.format("%Y-%m-%d").to_string()));
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        } else {
+            for item in response.payload.result.iter_mut() {
+                let time_int = &item.time_int;
+                let year = 2000 + ((time_int & 133169152) >> 20) % 100;
+                let month = (time_int & 983040) >> 16;
+                let day = (time_int & 63488) >> 11;
+                let hour = (time_int & 1984) >> 6;
+                let minute = time_int & 63;
+                // todo 转为时间戳，时区减8 转为 UTC时间戳
+                let hour = hour - 8;
+                let timestamp = chrono::NaiveDate::from_ymd_opt(year, month as u32, day as u32).unwrap().and_hms_opt(hour as u32, minute as u32,0).unwrap();
+                item.time = timestamp.and_utc().timestamp();
+            }
+        };
 
         Ok(response)
     }

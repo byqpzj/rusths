@@ -20,8 +20,8 @@ fn main() {
         Some("2024-01-01 00:00:00"),
         Some("2025-01-01 00:00:00"),
         Adjust::FORWARD,
-        Interval::DAY,
-        2000,
+        Interval::MIN_1,
+        1000,
     ).expect("Failed to get klines");
     let rs = klines.payload.result;
     let mut wtr = csv::Writer::from_path("klines.csv").expect("Failed to create CSV file");

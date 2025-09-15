@@ -122,7 +122,7 @@ pub struct TickAll {
 pub struct KLine {
     #[serde(skip_deserializing)]
     pub time: i64,
-    #[serde(rename(deserialize = "1"))]
+    #[serde(rename(deserialize = "1"),skip_serializing)]
     pub time_int: i32,
     #[serde(rename(deserialize = "7"))]
     pub open: f64,
