@@ -20,7 +20,7 @@ fn main() {
         Some("2024-01-01 00:00:00"),
         Some("2025-01-01 00:00:00"),
         Adjust::FORWARD,
-        Interval::MIN_1,
+        Interval::MIN_5,
         1000,
     ).expect("Failed to get klines");
     let rs = klines.payload.result;

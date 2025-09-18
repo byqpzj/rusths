@@ -78,6 +78,7 @@ pub struct TickAllResponse {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickAllPayload {
     pub result: Vec<TickAll>,
+    pub dict_extra: Option<HashMap<String, Value>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -460,9 +461,9 @@ impl THS {
         for item in response.payload.result.iter_mut() {
             // 只处理 9:30 前的数据 5400  =  (9.5小时 - 8 时区) * 3600
             if item.time % (3600 * 24) >= 5400  {
-                println!("break");
                 break
             }
+            // 2147483648 = 2^31 = 1000 .... 0000   一个无意义的数字
             if item.b5_v == 2147483648 {
                 item.b5_v = 0
             }
@@ -475,6 +476,9 @@ impl THS {
             if item.b2_v == 2147483648 {
                 item.b2_v = 0
             }
+            if item.b2_p == 2147483648f64 {
+                item.b2_p = 0f64
+            }
             if item.a5_v == 2147483648 {
                 item.a5_v = 0
             }
@@ -486,6 +490,12 @@ impl THS {
             }
             if item.a2_v == 2147483648 {
                 item.a2_v = 0
+            }
+            if item.a2_p == 2147483648f64 {
+                item.a2_p = 0f64
+            }
+            if item.amount == 4294967295{
+                item.amount = 0
             }
         }
         Ok(response)

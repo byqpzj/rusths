@@ -55,67 +55,94 @@ pub struct Tick {
 /// 单支五档行情数据格式
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TickAll {
+    /// 时间戳 北京时间 UTC+8
     #[serde(rename(deserialize = "1"))]
     pub time:i32,
+    /// 价格
     #[serde(rename(deserialize = "10"))]
-    pub price: f64, // 价格
+    pub price: f64,
+    /// 成交方向   1   5   0   15 
     #[serde(rename(deserialize = "12"))]
-    pub bs: u32, // 成交方向
+    pub bs: u32,
+    /// 总成交量
     #[serde(rename(deserialize = "13"))]
-    pub volume: i32, // 总成交量
+    pub volume: i32,
+    /// 外盘成交量
     #[serde(rename(deserialize = "14"))]
-    pub outer_volume: i32, // 外盘成交量
-
+    pub outer_volume: i32,
+    /// 买4价
     #[serde(rename(deserialize = "150"))]
-    pub b4_p: f64, // 买4价
+    pub b4_p: f64,
+    /// 买1量
     #[serde(rename(deserialize = "151"))]
-    pub b4_v: i64, // 买1量
+    pub b4_v: i64,
+    /// 卖4价
     #[serde(rename(deserialize = "152"))]
-    pub a4_p: f64, // 卖4价
+    pub a4_p: f64,
+    /// 卖4量
     #[serde(rename(deserialize = "153"))]
-    pub a4_v: i64, // 卖4量
+    pub a4_v: i64,
+    /// 买5价
     #[serde(rename(deserialize = "154"))]
-    pub b5_p: f64, // 买5价
+    pub b5_p: f64,
+    /// 买5量
     #[serde(rename(deserialize = "155"))]
-    pub b5_v: i64, // 买5量
+    pub b5_v: i64,
+    /// 卖5价
     #[serde(rename(deserialize = "156"))]
-    pub a5_p: f64, // 卖5价
+    pub a5_p: f64,
+    /// 卖5量
     #[serde(rename(deserialize = "157"))]
-    pub a5_v: i64, // 卖5量
+    pub a5_v: i64,
 
+    /// 交易笔数
     #[serde(rename(deserialize = "18"))]
-    pub trade_num: u32, // 交易笔数
+    pub trade_num: u32,
+    /// 总成交额
     #[serde(rename(deserialize = "19"))]
-    pub turnover: i64, // 总成交额
+    pub amount: i64,
 
+    /// 买1价
     #[serde(rename(deserialize = "20"))]
-    pub b1_p: f64, // 买1价
+    pub b1_p: f64,
+    /// 卖1价
     #[serde(rename(deserialize = "21"))]
-    pub a1_p: f64, // 卖1价
+    pub a1_p: f64,
+    /// 买1量
     #[serde(rename(deserialize = "25"))]
-    pub b1_v: i64, // 买1量
+    pub b1_v: i64,
+    /// 买2价
     #[serde(rename(deserialize = "26"))]
-    pub b2_p: f64, // 买2价
+    pub b2_p: f64,
+    /// 买2量
     #[serde(rename(deserialize = "27"))]
-    pub b2_v: i64, // 买2量
+    pub b2_v: i64,
+    /// 买3价
     #[serde(rename(deserialize = "28"))]
-    pub b3_p: f64, // 买3价
+    pub b3_p: f64,
+    /// 买3量
     #[serde(rename(deserialize = "29"))]
-    pub b3_v: i64, // 买3量
+    pub b3_v: i64,
 
+    /// 卖1量
     #[serde(rename(deserialize = "31"))]
-    pub a1_v: i64, // 卖1量
+    pub a1_v: i64,
+    /// 卖2价
     #[serde(rename(deserialize = "32"))]
-    pub a2_p: f64, // 卖2价
+    pub a2_p: f64,
+    /// 卖2量
     #[serde(rename(deserialize = "33"))]
-    pub a2_v: i64, // 卖2量
+    pub a2_v: i64,
+    /// 卖3价
     #[serde(rename(deserialize = "34"))]
-    pub a3_p: f64, // 卖3价
+    pub a3_p: f64,
+    /// 卖3量
     #[serde(rename(deserialize = "35"))]
-    pub a3_v: i64, // 卖3量
+    pub a3_v: i64,
 
+    /// 当前量
     #[serde(rename(deserialize = "49"))]
-    pub live_vol: i64, // 当前量
+    pub live_vol: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -180,7 +207,7 @@ pub struct OrderBookData {
     pub order_count: i32,
 }
 
-
+// 命名参考 https://quant.10jqka.com.cn/view/dataplatform/detail/20
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IpoData {
     pub symbol: String,
