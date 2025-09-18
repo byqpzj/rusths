@@ -264,6 +264,15 @@ impl THS {
     // }
 
     pub fn connect(&mut self) -> Result<Response, THSError> {
+        if self.login {
+            return Ok(Response {
+                err_info: String::new(),
+                payload: Payload {
+                    result: None,
+                    dict_extra: None,
+                }
+            });
+        }
         for attempt in 0..5 {
             let param = serde_json::to_string(&self.ops).unwrap();
             match self.call::<Response>("connect", Some(param), 10 * 1024) {
