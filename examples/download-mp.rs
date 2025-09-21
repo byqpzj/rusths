@@ -20,7 +20,7 @@ fn main() {
             .env("DOWNLOAD", "YES")
             .spawn()
             .expect("Failed to spawn process");
-        
+
         handles.push(child);
     }
 
@@ -34,7 +34,7 @@ fn download_child_process(thread_id: &str) {
     // 在子进程中创建实例，不影响
     let mut ths = THS::new(None).expect("Failed to create instance");
     ths.connect().expect("Failed to connect to server");
-    
+
     let klines = ths.tick_super_level1("USHA600795").expect("Failed to get tick in process");
 
     println!("Process {} got klines: {:?}", thread_id, klines.payload.result);
