@@ -37,7 +37,7 @@ fn download_child_process(thread_id: &str) {
     
     let klines = ths.tick_super_level1("USHA600795").expect("Failed to get tick in process");
 
-    println!("Process {} got klines: {:?}", thread_id, klines.payload.result.len());
+    println!("Process {} got klines: {:?}", thread_id, klines.payload.result);
 
     // 断开连接
     ths.disconnect().expect("Failed to disconnect");
