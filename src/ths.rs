@@ -291,7 +291,7 @@ impl THS {
             }
             std::thread::sleep(std::time::Duration::from_secs(1 << attempt));
         }
-        Err(THSError::ApiError("尝试 5 次后连接失败".into()))
+        Err(THSError::ApiError(format!("尝试 5 次后连接失败: {}", self.ops.username)))
     }
 
     pub fn disconnect(&mut self) -> Result<(), THSError> {
@@ -407,7 +407,6 @@ impl THS {
         }
 
         let mut response:KLineResponse = self.call::<KLineResponse>("klines", Some(params.to_string()), 1024 * 1024)?;
-        // todo 处理返回数据中的时间字段， 日线和分钟线分开处理
         // 处理返回数据中的时间字段
         if interval == Interval::DAY || interval == Interval::WEEK || interval == Interval::MONTH || interval == Interval::QUARTER || interval == Interval::YEAR {
             for item in response.payload.result.iter_mut() {
@@ -427,7 +426,7 @@ impl THS {
                 let day = (time_int & 63488) >> 11;
                 let hour = (time_int & 1984) >> 6;
                 let minute = time_int & 63;
-                // todo 转为时间戳，时区减8 转为 UTC时间戳
+                // 转为时间戳，时区减8 转为 UTC时间戳
                 let hour = hour - 8;
                 let timestamp = chrono::NaiveDate::from_ymd_opt(year, month as u32, day as u32).unwrap().and_hms_opt(hour as u32, minute as u32,0).unwrap();
                 item.time = timestamp.and_utc().timestamp();
